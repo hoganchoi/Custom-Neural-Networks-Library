@@ -73,3 +73,73 @@ class MAE():
         nabla_mae = (-1 / num_elements) * (np.sign(self.actual_value - self.predictions))
         ## Return the gradient of MAE.
         return nabla_mae
+
+##########################################################################################################################################################################
+## Neural Network loss functions created using CuPy.
+## Matrix operations are compiled on GPU.
+##########################################################################################################################################################################
+
+## A class that represents the Mean Absolute Error compiled on the GPU.
+class MAE_GPU():
+    '''
+    A class that computes the Mean Absolute Error between the true value and the predicted value on GPU.
+
+    Attributes:
+        actual_value (cp.array): An array containing all the true values.
+        predictions (cp.array): An array containing all the predictions from the model.
+
+    Methods:
+        calculateLoss (self): Calculates the error between the true value and the model's predictions on GPU.
+        calculateLossGrad (self): Calculates the gradient of the error between the true value and the model's predictions on GPU.
+
+    Usage:
+        A method to calculate the loss between the model and the actual values on GPU.
+    '''
+    ## Initializes the MAE function on the GPU.
+    def __init__(self, true_outputs, model_outputs):
+        '''
+        Initializes the parameters for MAE function on GPU.
+
+        Args:
+            true_outputs (cp.array): An array containing all the true values.
+            model_outputs (cp.array): An array containing all the model's predictions for each batch.
+
+        Returns:
+            None
+        '''
+        self.actual_value = true_outputs
+        self.predictions = model_outputs
+
+    ## Calculates the loss between the true value and the model's predictions on GPU.
+    def calculateLoss(self):
+        '''
+        Returns the average loss between the actual values and the model's predictions on GPU.
+
+        Args:
+            None
+
+        Returns:
+            mae (cp.array): An array storing all the Mean Absolute Errors for each batch.
+        '''
+        ## Calculate the Mean Absolute Error between the actual value and the model's predictions.
+        mae = cp.mean(cp.abs(self.actual_value - self.predictions), axis = 1)
+        ## Return the MAE value.
+        return mae
+    
+    ## Computes the gradient of the MAE loss function on GPU.
+    def calculateLossGrad(self):
+        '''
+        Returns the gradient of the loss function compiled on GPU.
+
+        Args:
+            None
+
+        Returns:
+            nabla_mae (cp.array): An array storing all the gradient error values for each batch.
+        '''
+        ## Find the number of elements in the actual value vector.
+        num_elements = self.actual_value.shape[0]
+        ## Calculate the gradient of the MAE function.
+        nabla_mae = (-1 / num_elements) * (cp.sign(self.actual_value - self.predictions))
+        ## Return the gradient of MAE.
+        return nabla_mae
