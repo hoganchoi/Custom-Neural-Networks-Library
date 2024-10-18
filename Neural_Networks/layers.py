@@ -24,8 +24,6 @@ class Fully_Connected():
         in_neurons (int): An integer representing the shape of the input.
         out_neurons (int): An integer representing the shape of the output.
         activation (activations): The activation function use for each neuron.
-        optimizer (optimizers): The optimization function used for training.
-        lr (float): The learning rate used for training.
         test_weights (np.array): Custom weights that the user can assign for testing.
         test_bias (np.array): Custom biases that the user can assign for testing.
 
@@ -38,7 +36,7 @@ class Fully_Connected():
         Used for building the dense portion of a neural network.
     '''
     ## Initializes the Fully Connected layer instance.
-    def __init__(self, batch_size, in_neurons, out_neurons, activation, optimizer, lr, test_weights = None, test_bias = None):
+    def __init__(self, batch_size, in_neurons, out_neurons, activation, test_weights = None, test_bias = None):
         '''
         Initializes the fully connected layer on CPU.
 
@@ -47,8 +45,6 @@ class Fully_Connected():
             in_neurons (int): An integer representing the number of input neurons.
             out_neurons (int): An integer representing the number of output neurons.
             activation (activations): The activation function use for each neuron.
-            optimizer (optimizers): The optimization function used for training.
-            lr (float): The learning rate used for training.
             test_weights (np.array): Custom weights that the user can assign for testing.
             test_bias (np.array): Custom biases that the user can assign for testing.
 
@@ -59,13 +55,9 @@ class Fully_Connected():
         self.inputs = None
         self.in_shape = (batch_size, in_neurons)
         self.out_shape = out_neurons
-        self.lr = lr
 
         ## Assigns the activation function.
         self.activation = activation
-
-        ## Initializes the optimizer function.
-        self.optimizer = optimizer(self.activation, self.lr)
 
         ## Initializes the outputs for this layer.
         self.x = np.zeros(shape = (self.in_shape[0], self.out_shape))
@@ -116,18 +108,26 @@ class Fully_Connected():
         return output
     
     ## Performs the backward propagation/pass in a fully connected layer on CPU
-    def backward_propagate(self, out_delta):
+    def backward_propagate(self, out_delta, optimizer, lr):
         '''
         Executes the backward pass for this layer using CPU.
 
         Args:
             out_delta (np.array): The dot product of the gradient of the succeeding layer and the weights between this layer and the preceding layer.
+            optimizer (optimizers): The optimization function used for training.
+            lr (float): The learning rate used for training.
 
         Returns:
             in_delta (np.array): The dot product of the gradient of this layer and the weights between the previous layer and this layer.
         '''
         ## Perform backward propagation using defined optimizer function.
-        in_delta, w_prime, b_prime = self.optimizer.optimizeGrad(self.x, self.input, self.weights, self.bias, out_delta)
+        in_delta, w_prime, b_prime = optimizer.optimizeGrad(x = self.x, 
+                                                            input = self.input, 
+                                                            weights = self.weights, 
+                                                            bias = self.bias,
+                                                            activation = self.activation,
+                                                            out_delta = out_delta, 
+                                                            lr = lr)
 
         ## Update current weights and biases.
         self.weights = w_prime
